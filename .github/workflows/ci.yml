@@ -8,28 +8,28 @@ jobs:
     #girerà su un server ubuntu fornito da github
     runs-on: ubuntu-latest
 
-  steps:
-    #2. scarica il codice del repository
-    - name: Checkout del codice
-      uses: actions/checkout@v4
+    steps:
+      #2. scarica il codice del repository
+      - name: Checkout del codice
+        uses: actions/checkout@v4
 
-    #3. installa python e bandit per la scansione di sicurezza del codice
-    - name: Setup Python e scansione codice (Bandit)
-      run: |
-        pip install bandit
-        bandit -r main.py
+      #3. installa python e bandit per la scansione di sicurezza del codice
+      - name: Setup Python e scansione codice (Bandit)
+        run: |
+          pip install bandit
+          bandit -r main.py
 
-    #4. costruzione dell'immagine Docker 
-    - name: Build dell'immagine Docker 
-      run: docker build -t app-iot-locale:latest .
+      #4. costruzione dell'immagine Docker 
+      - name: Build dell'immagine Docker 
+        run: docker build -t app-iot-locale:latest .
 
-    #5. scansione dell'immagine Docker con Trivy
-    - name: Scansione vulnerabilità container (Trivy)
-      uses: aquasecurity/trivy-action@master
-      with:
-        image-ref: 'app-iot-locale:latest'
-        format: 'table'
-        exit-code: '0' 
-        ignore-unfixed: true
-        vuln-type: 'os,library'
-        severity: 'CRITICAL.HIGH'
+      #5. scansione dell'immagine Docker con Trivy
+      - name: Scansione vulnerabilità container (Trivy)
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'app-iot-locale:latest'
+          format: 'table'
+          exit-code: '0' 
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL.HIGH'
