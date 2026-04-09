@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enterprise IoT Dashboard | Florence Consulting Group</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white font-sans min-h-screen p-8">
+
+    <div class="max-w-4xl mx-auto">
+        <header class="border-b border-gray-700 pb-4 mb-8 flex justify-between items-center">
+            <div>
+                <h1 class="text-3xl font-bold text-blue-400">Industria 4.0 Monitor</h1>
+                <p class="text-gray-400 text-sm">Distretto Tessile - TT Tecnosistemi / Florence Consulting</p>
+            </div>
+            <div class="animate-pulse flex items-center space-x-2">
+                <div class="h-3 w-3 bg-green-500 rounded-full"></div>
+                <span class="text-sm text-green-400">Sistema Connesso (Hybrid Cloud)</span>
+            </div>
+        </header>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            
+            <div class="bg-gray-800 p-6 rounded-lg shadow-lg border border-gray-700">
+                <h2 class="text-gray-400 font-semibold mb-2">Efficienza Produzione</h2>
+                <div class="flex items-end space-x-2">
+                    <span id="efficienza" class="text-5xl font-bold text-white">--</span>
+                    <span class="text-xl text-gray-500 mb-1">%</span>
+                </div>
+            </div>
+
+            <div class="bg-gray-800 p-6 rounded-lg shadow-lg border border-gray-700">
+                <h2 class="text-gray-400 font-semibold mb-2">Temperatura Media Motori</h2>
+                <div class="flex items-end space-x-2">
+                    <span id="temperatura" class="text-5xl font-bold text-white">--</span>
+                    <span class="text-xl text-gray-500 mb-1">°C</span>
+                </div>
+            </div>
+
+            <div class="bg-gray-800 p-6 rounded-lg shadow-lg border border-gray-700 md:col-span-2 flex justify-between items-center">
+                <div>
+                    <h2 class="text-gray-400 font-semibold mb-1">Stato Impianto: <span id="reparto" class="text-blue-300">--</span></h2>
+                    <p id="stato" class="text-2xl font-bold text-green-400">CARICAMENTO...</p>
+                </div>
+                <div class="text-right">
+                    <h2 class="text-gray-400 font-semibold mb-1">Telai in Rete</h2>
+                    <p id="telai" class="text-3xl font-bold text-white">--</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function aggiornaDati() {
+            try {
+                // Chiama l'indirizzo API che abbiamo creato in FastAPI
+                const response = await fetch('/api/telai');
+                const data = await response.json();
+
+                // Aggiorna la grafica con i dati veri
+                document.getElementById('efficienza').innerText = data.efficienza_percentuale;
+                document.getElementById('temperatura').innerText = data.temperatura_media_C;
+                document.getElementById('reparto').innerText = data.reparto;
+                document.getElementById('telai').innerText = data.telai_connessi;
+                
+                // Gestione colori allarme
+                const statoElement = document.getElementById('stato');
+                statoElement.innerText = data.stato_generale;
+                if(data.stato_generale === "ALLARME TEMPERATURA") {
+                    statoElement.className = "text-2xl font-bold text-red-500 animate-pulse";
+                    document.getElementById('temperatura').classList.replace("text-white", "text-red-500");
+                } else {
+                    statoElement.className = "text-2xl font-bold text-green-400";
+                    document.getElementById('temperatura').classList.replace("text-red-500", "text-white");
+                }
+
+            } catch (error) {
+                console.error("Errore di connessione al server IoT", error);
+            }
+        }
+
+        // Esegui subito e poi aggiorna i dati ogni 2 secondi
+        aggiornaDati();
+        setInterval(aggiornaDati, 2000);
+    </script>
+</body>
+</html>
