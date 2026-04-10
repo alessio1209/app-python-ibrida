@@ -11,17 +11,17 @@ jobs:
     steps:
       #2. scarica il codice del repository
       - name: Checkout del codice
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4 #è il robot. Equivale a fare git clone del repo
 
       #3. installa python e bandit per la scansione di sicurezza del codice
       - name: Setup Python e scansione codice (Bandit)
         run: |
-          pip install bandit
-          bandit -r main.py
+          pip install bandit 
+          bandit -r main.py #Bandit legge il file python alla ricerca di password in chiaro, funzioni pericolose o falle logiche, tutto questo prima ancora che il codice venga eseguito
 
       #4. costruzione dell'immagine Docker 
       - name: Build dell'immagine Docker 
-        run: docker build -t app-iot-locale:latest .
+        run: docker build -t app-iot-locale:latest . #il robot costruisce la scatola seguendo le istruzioni del Dockerfile e attacca un'etichetta temporanea (app-iot-locale)
 
       #5. scansione dell'immagine Docker con Trivy
       - name: Scansione vulnerabilità container (Trivy)
@@ -29,7 +29,28 @@ jobs:
         with:
           image-ref: 'app-iot-locale:latest'
           format: 'table'
-          exit-code: '0' 
+          exit-code: '1' #se Trivy trova vulnerabilità HIGH o CRITICAL, lancia un codice di errore "1", quindi si ferma e non andrà avanti
           ignore-unfixed: true
           vuln-type: 'os,library'
           severity: 'CRITICAL,HIGH'
+
+      #6. estrazione della commit da github
+      - name: Estrazione hash del commit 
+        run: echo "HASH=$(git rev-parse --short HEAD)" >> $GITHUB_ENV 
+
+      #7. login a docker hub tramite estrazione di credenziali 
+      - name: Login su docker hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.$DOCKER_USERNAME }}
+          password: ${{ secrets.$DOCKER_PASSWORD }}
+
+      #8. spedizione dell'immagine su docker hub
+      - name: Tag e push su docker hub
+        run: |
+          #il robot stacca l'etichetta temporanea (app-iot-locale) e ne attacca due nuove. la prima con il nome del account con la commit unica di github e la seconda con latest, ultima versione disponibile
+          docker tag app-iot-locale:latest alessioerco12/iot-dashboard:${{ env.HASH }} 
+          docker tag app-iot-locale:latest alessioerco12/iot-dashboard:latest
+
+          docker push alessioerco12/iot-dashboard:${{ env.HASH }}
+          docker push alessioerco12/iot-dashboard:latest
