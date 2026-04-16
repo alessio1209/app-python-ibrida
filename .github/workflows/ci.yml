@@ -54,3 +54,19 @@ jobs:
 
           docker push alessioerco12/iot-dashboard:${{ env.HASH }}
           docker push alessioerco12/iot-dashboard:latest
+
+      #9. aggiornamento del manifesto nel repository dell'infrastruttura
+      - name: Aggiorna il tag immagine nel repo infrastruttura
+        run: |
+          #clona il repo dell'infrastruttura usando un token 
+          git clone https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/alessio1209/infrastruttura-gitops-aws.git
+          cd infrastruttura-gitops-aws
+          #configuriammo l'identità del bot per l'Audit Trail
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          #trova e sostituisce il tag dell'immagine con il nuovo hash
+          sed -i "s|image: alessioerco12/iot-dashboard:.*|image: alessioerco12/iot-dashboard:${{ env.HASH }}|g" k8s/base/deployment.yaml
+          #salva e spedisce sul ramo main dell'infrastruttura
+          git add k8s/base/deployment.yaml
+          git commit -m "chore(gitops): aggiornato tag app IoT alla versione ${{ env.HASH }}"
+          git push origin main
