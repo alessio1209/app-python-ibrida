@@ -19,7 +19,7 @@ def get_dati_telai(): #funzione che calcola i dati in tempo reale
 		"reparto": "Tessitura Prato Est",
 		"stato_generale": stato, 
 		"efficienza_percentuale": efficienza,
-		"temperatura_media_C": temperatura
+		"temperatura_media_C": temperatura,
 		"telai_connessi": 42
 	}
 
