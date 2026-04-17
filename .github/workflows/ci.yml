@@ -66,7 +66,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           #sed è uno stream editor per manipolare testi. -i modifica il file direttamente nel disco. s|vecchio|nuovo|g cerca una determinata stringa e la sostituisce globalmente
-          sed -i "s|image: alessioerco12/iot-dashboard:.*|image: alessioerco12/iot_dashboard:${{ env.HASH }}|g" k8s/base/deployment.yaml
+          sed -i "s|image: alessioerco12/iot-dashboard:.*|image: alessioerco12/iot-dashboard:${{ env.HASH }}|g" k8s/base/deployment.yaml
           #effettua add, commit e push. Usiamo il prefisso chore perchè è un'operazione di routine/manutenzione e spinge la modifica sul ramo principale dell'infrastruttura
           git add k8s/base/deployment.yaml
           git commit -m "chore(gitops): aggiornato tag app IoT alla versione ${{ env.HASH }}"
