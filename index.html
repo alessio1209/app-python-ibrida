@@ -2,87 +2,105 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Enterprise IoT Dashboard | Florence Consulting Group</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Enterprise IoT Dashboard</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0f172a; color: white; margin: 0; display: flex; height: 100vh; overflow: hidden; }
+        /* Sidebar Menu */
+        #sidebar { width: 260px; background-color: #1e293b; padding: 20px; overflow-y: auto; border-right: 1px solid #334155; }
+        #sidebar h2 { color: #38bdf8; font-size: 1.2rem; margin-bottom: 20px; text-transform: uppercase; }
+        .sector-title { color: #94a3b8; font-weight: bold; margin-top: 15px; margin-bottom: 5px; text-transform: uppercase; font-size: 0.9rem; }
+        .machine-btn { display: block; width: 100%; text-align: left; background: none; border: none; color: #e2e8f0; padding: 10px; margin-bottom: 5px; border-radius: 5px; cursor: pointer; transition: 0.3s; }
+        .machine-btn:hover, .machine-btn.active { background-color: #0284c7; color: white; }
+        /* Main Content */
+        #main-content { flex-grow: 1; padding: 40px; overflow-y: auto; }
+        .header { border-bottom: 1px solid #334155; padding-bottom: 20px; margin-bottom: 30px; }
+        .header h1 { margin: 0; color: #38bdf8; }
+        /* Cards */
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+        .card { background-color: #1e293b; padding: 20px; border-radius: 10px; border: 1px solid #334155; }
+        .card h3 { margin-top: 0; color: #94a3b8; font-size: 1rem; }
+        .valore { font-size: 3rem; font-weight: bold; }
+        /* Terminal Log */
+        .terminal { background-color: #000; color: #22c55e; font-family: 'Courier New', Courier, monospace; padding: 15px; border-radius: 5px; height: 150px; overflow-y: auto; }
+        .log-line { margin: 5px 0; }
+    </style>
 </head>
-<body class="bg-gray-900 text-white font-sans min-h-screen p-8">
-
-    <div class="max-w-4xl mx-auto">
-        <header class="border-b border-gray-700 pb-4 mb-8 flex justify-between items-center">
-            <div>
-                <h1 class="text-3xl font-bold text-blue-400">Industria 4.0 Monitor</h1>
-                <p class="text-gray-400 text-sm">Distretto Tessile - TT Tecnosistemi / Florence Consulting</p>
+<body>
+ 
+    <div id="sidebar">
+        <h2>🏭 Impianti</h2>
+        <div id="menu-container">Caricamento menu...</div>
+    </div>
+ 
+    <div id="main-content">
+        <div class="header">
+            <h1 id="titolo-macchina">Seleziona un macchinario</h1>
+            <p style="color: #94a3b8;" id="sottotitolo-settore">In attesa di selezione...</p>
+        </div>
+ 
+        <div class="grid">
+            <div class="card">
+                <h3>Efficienza Produzione</h3>
+                <div class="valore" id="val-efficienza">--%</div>
             </div>
-            <div class="animate-pulse flex items-center space-x-2">
-                <div class="h-3 w-3 bg-green-500 rounded-full"></div>
-                <span class="text-sm text-green-400">Sistema Connesso (Hybrid Cloud)</span>
+            <div class="card">
+                <h3>Temperatura Motori</h3>
+                <div class="valore" id="val-temperatura">--°C</div>
             </div>
-        </header>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            
-            <div class="bg-gray-800 p-6 rounded-lg shadow-lg border border-gray-700">
-                <h2 class="text-gray-400 font-semibold mb-2">Efficienza Produzione</h2>
-                <div class="flex items-end space-x-2">
-                    <span id="efficienza" class="text-5xl font-bold text-white">--</span>
-                    <span class="text-xl text-gray-500 mb-1">%</span>
-                </div>
+            <div class="card" style="grid-column: span 2;">
+                <h3>Stato Impianto</h3>
+                <div class="valore" id="val-stato" style="font-size: 2rem;">--</div>
             </div>
-
-            <div class="bg-gray-800 p-6 rounded-lg shadow-lg border border-gray-700">
-                <h2 class="text-gray-400 font-semibold mb-2">Temperatura Media Motori</h2>
-                <div class="flex items-end space-x-2">
-                    <span id="temperatura" class="text-5xl font-bold text-white">--</span>
-                    <span class="text-xl text-gray-500 mb-1">°C</span>
-                </div>
-            </div>
-
-            <div class="bg-gray-800 p-6 rounded-lg shadow-lg border border-gray-700 md:col-span-2 flex justify-between items-center">
-                <div>
-                    <h2 class="text-gray-400 font-semibold mb-1">Stato Impianto: <span id="reparto" class="text-blue-300">--</span></h2>
-                    <p id="stato" class="text-2xl font-bold text-green-400">CARICAMENTO...</p>
-                </div>
-                <div class="text-right">
-                    <h2 class="text-gray-400 font-semibold mb-1">Telai in Rete</h2>
-                    <p id="telai" class="text-3xl font-bold text-white">--</p>
-                </div>
+        </div>
+ 
+        <div class="card" style="grid-column: span 2;">
+            <h3>Dati di Log (Live Console)</h3>
+            <div class="terminal" id="terminal-logs">
+                > In attesa di connessione col macchinario...
             </div>
         </div>
     </div>
-
+ 
     <script>
-        async function aggiornaDati() {
-            try {
-                // Chiama l'indirizzo API che abbiamo creato in FastAPI
-                const response = await fetch('/api/telai');
-                const data = await response.json();
-
-                // Aggiorna la grafica con i dati veri
-                document.getElementById('efficienza').innerText = data.efficienza_percentuale;
-                document.getElementById('temperatura').innerText = data.temperatura_media_C;
-                document.getElementById('reparto').innerText = data.reparto;
-                document.getElementById('telai').innerText = data.telai_connessi;
-                
-                // Gestione colori allarme
-                const statoElement = document.getElementById('stato');
-                statoElement.innerText = data.stato_generale;
-                if(data.stato_generale === "ALLARME TEMPERATURA") {
-                    statoElement.className = "text-2xl font-bold text-red-500 animate-pulse";
-                    document.getElementById('temperatura').classList.replace("text-white", "text-red-500");
-                } else {
-                    statoElement.className = "text-2xl font-bold text-green-400";
-                    document.getElementById('temperatura').classList.replace("text-red-500", "text-white");
+        // Quando la pagina si carica, chiedi al server la struttura dell'azienda per creare il menu
+        fetch('/api/struttura')
+            .then(res => res.json())
+            .then(settori => {
+                const menu = document.getElementById('menu-container');
+                menu.innerHTML = ''; 
+ 
+                // Crea i bottoni per ogni settore e macchina
+                for (const [nomeSettore, macchine] of Object.entries(settori)) {
+                    menu.innerHTML += `<div class="sector-title">${nomeSettore}</div>`;
+                    macchine.forEach(macchina => {
+                        menu.innerHTML += `<button class="machine-btn" onclick="caricaDati('${nomeSettore}', '${macchina}')">${macchina}</button>`;
+                    });
                 }
-
-            } catch (error) {
-                console.error("Errore di connessione al server IoT", error);
-            }
+            });
+ 
+        // Funzione per caricare i dati quando si clicca un bottone
+        function caricaDati(settore, macchina) {
+            fetch(`/api/dati/${settore}/${macchina}`)
+                .then(res => res.json())
+                .then(dati => {
+                    document.getElementById('titolo-macchina').innerText = dati.macchinario;
+                    document.getElementById('sottotitolo-settore').innerText = "Settore: " + dati.settore;
+ 
+                    document.getElementById('val-efficienza').innerText = dati.efficienza + "%";
+                    document.getElementById('val-temperatura').innerText = dati.temperatura + "°C";
+ 
+                    const statoEl = document.getElementById('val-stato');
+                    statoEl.innerText = dati.stato;
+                    statoEl.style.color = dati.stato.includes("ALLARME") ? "#ef4444" : (dati.stato.includes("MANUTENZIONE") ? "#f59e0b" : "#22c55e");
+ 
+                    // Aggiorna il terminale dei log
+                    const terminal = document.getElementById('terminal-logs');
+                    terminal.innerHTML = "";
+                    dati.logs.forEach(log => {
+                        terminal.innerHTML += `<div class="log-line">> ${log}</div>`;
+                    });
+                });
         }
-
-        // Esegui subito e poi aggiorna i dati ogni 2 secondi
-        aggiornaDati();
-        setInterval(aggiornaDati, 2000);
     </script>
 </body>
 </html>
